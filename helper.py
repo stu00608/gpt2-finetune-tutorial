@@ -1,10 +1,52 @@
 import io
 import os
 import torch
+import numpy as np
 from tqdm import tqdm
 from torch.utils.data import Dataset, DataLoader
 from ml_things import plot_dict, plot_confusion_matrix, fix_text
 from sklearn.metrics import classification_report, accuracy_score
+
+
+class SNSSpamDataset(Dataset):
+
+    def __init__(self, path, use_tokenizer=None):
+        self.texts = []
+        self.labels = []
+        # Since the labels are defined by folders with data we loop
+        # through each label.
+        with open(path) as f:
+            for line in f.readlines():
+                split = line.split('\t')
+                # Save content.
+                self.texts.append(split[1])
+                # Save encode labels.
+                self.labels.append(1 if split[0] == "spam" else 0)
+        return
+
+    def __len__(self):
+        r"""When used `len` return the number of examples.
+
+        """
+
+        return self.n_examples
+
+    def __getitem__(self, item):
+        r"""Given an index return an example from the position.
+
+        Arguments:
+
+          item (:obj:`int`):
+              Index position to pick an example to return.
+
+        Returns:
+          :obj:`Dict[str, str]`: Dictionary of inputs that contain text and 
+          asociated labels.
+
+        """
+
+        return {'text': self.texts[item],
+                'label': self.labels[item]}
 
 
 class MovieReviewsDataset(Dataset):
@@ -148,3 +190,44 @@ class Gpt2ClassificationCollator(object):
         inputs.update({'labels': torch.tensor(labels)})
 
         return inputs
+
+
+def b_tp(preds, labels):
+    '''Returns True Positives (TP): count of correct predictions of actual class 1'''
+    return sum([preds == labels and preds == 1 for preds, labels in zip(preds, labels)])
+
+
+def b_fp(preds, labels):
+    '''Returns False Positives (FP): count of wrong predictions of actual class 1'''
+    return sum([preds != labels and preds == 1 for preds, labels in zip(preds, labels)])
+
+
+def b_tn(preds, labels):
+    '''Returns True Negatives (TN): count of correct predictions of actual class 0'''
+    return sum([preds == labels and preds == 0 for preds, labels in zip(preds, labels)])
+
+
+def b_fn(preds, labels):
+    '''Returns False Negatives (FN): count of wrong predictions of actual class 0'''
+    return sum([preds != labels and preds == 0 for preds, labels in zip(preds, labels)])
+
+
+def b_metrics(preds, labels):
+    '''
+    Returns the following metrics:
+      - accuracy    = (TP + TN) / N
+      - precision   = TP / (TP + FP)
+      - recall      = TP / (TP + FN)
+      - specificity = TN / (TN + FP)
+    '''
+    preds = np.argmax(preds, axis=1).flatten()
+    labels = labels.flatten()
+    tp = b_tp(preds, labels)
+    tn = b_tn(preds, labels)
+    fp = b_fp(preds, labels)
+    fn = b_fn(preds, labels)
+    b_accuracy = (tp + tn) / len(labels)
+    b_precision = tp / (tp + fp) if (tp + fp) > 0 else 'nan'
+    b_recall = tp / (tp + fn) if (tp + fn) > 0 else 'nan'
+    b_specificity = tn / (tn + fp) if (tn + fp) > 0 else 'nan'
+    return b_accuracy, b_precision, b_recall, b_specificity
