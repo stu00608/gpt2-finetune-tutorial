@@ -17,6 +17,8 @@ rm smsspamcollection.zip
 ```
 
 * Put them into `aclImdb` and `smss` folder in repo's root.
+<img width="253" alt="CleanShot 2022-09-06 at 17 20 07@2x" src="https://user-images.githubusercontent.com/40068587/188598278-038aa396-a32a-4f4d-b65b-f538ba530250.png">
+
 
 ## Reference
 * [🎱 GPT2 For Text Classification using Hugging Face 🤗 Transformers](https://gmihaila.github.io/tutorial_notebooks/gpt2_finetune_classification/)
