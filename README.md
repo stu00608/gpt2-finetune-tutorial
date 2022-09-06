@@ -22,3 +22,5 @@ rm smsspamcollection.zip
 
 ## Reference
 * [🎱 GPT2 For Text Classification using Hugging Face 🤗 Transformers](https://gmihaila.github.io/tutorial_notebooks/gpt2_finetune_classification/)
+* [Fine-Tuning BERT for Text Classification
+](https://towardsdatascience.com/fine-tuning-bert-for-text-classification-54e7df642894)
